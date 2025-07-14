@@ -16,8 +16,8 @@ async function syncRuns() {
   let stillUnsynced = [];
   for (const run of unsynced) {
     try {
-      // Replace with your real API endpoint
-      await fetch('/api/sync-run', {
+      // Use a public endpoint for demo/testing
+      await fetch('https://httpbin.org/post', {
         method: 'POST',
         body: JSON.stringify(run),
         headers: { 'Content-Type': 'application/json' }
