@@ -13,30 +13,32 @@ async function syncRuns() {
   try {
     unsynced = (await self.idbKeyval.get(KEY)) || [];
   } catch {}
+  console.log('[ServiceWorker] Starting syncRuns. Unsynced runs:', unsynced.length);
   let stillUnsynced = [];
   for (const run of unsynced) {
     try {
-      // Use a public endpoint for demo/testing
       await fetch('https://httpbin.org/post', {
         method: 'POST',
         body: JSON.stringify(run),
         headers: { 'Content-Type': 'application/json' }
       });
-      // Add to localStorage (jogger_runs)
       let runs = [];
       try {
         runs = JSON.parse(self.localStorage.getItem('jogger_runs') || '[]');
       } catch {}
       runs.unshift(run);
       self.localStorage.setItem('jogger_runs', JSON.stringify(runs));
+      console.log('[ServiceWorker] Synced run and added to jogger_runs:', run);
     } catch {
-      // If any fail, keep them for next sync
       stillUnsynced.push(run);
+      console.log('[ServiceWorker] Failed to sync run, keeping in unsynced:', run);
     }
   }
   if (stillUnsynced.length > 0) {
     await self.idbKeyval.set(KEY, stillUnsynced);
+    console.log('[ServiceWorker] Updated unsynced_runs in IndexedDB. Remaining:', stillUnsynced.length);
   } else {
     await self.idbKeyval.del(KEY);
+    console.log('[ServiceWorker] All runs synced. Cleared unsynced_runs in IndexedDB.');
   }
 } 
