@@ -22,6 +22,13 @@ async function syncRuns() {
         body: JSON.stringify(run),
         headers: { 'Content-Type': 'application/json' }
       });
+      // Add to localStorage (jogger_runs)
+      let runs = [];
+      try {
+        runs = JSON.parse(self.localStorage.getItem('jogger_runs') || '[]');
+      } catch {}
+      runs.unshift(run);
+      self.localStorage.setItem('jogger_runs', JSON.stringify(runs));
     } catch {
       // If any fail, keep them for next sync
       stillUnsynced.push(run);
